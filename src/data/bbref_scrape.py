@@ -46,9 +46,9 @@ class BoxScoreScraper(object):
         self.box_score = BoxScore()
 
         # Scrape linescore table
-        self.get_linescore()
+        self.scrape_linescore()
 
-    def get_linescore(self):
+    def scrape_linescore(self):
         """Scrapes basic overview of game including runs in each inning, hits, errors, final score, teams, and pitchers."""
         table = self.divs.find('table', {'class' : "linescore"})
         df = pd.read_html(table.prettify(), flavor='lxml')[0]
