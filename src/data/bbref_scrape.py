@@ -55,4 +55,5 @@ class BoxScoreScraper(object):
         df = df.drop(df.columns[0], axis=1)
         df = df.drop(2)
         df.rename(columns = {df.columns[0] : 'Team'}, inplace=True)
+        df[df.columns[1:]] = df[df.columns[1:]].astype('int')
         self.box_score.set_linescore(df)
