@@ -1,3 +1,10 @@
+'''
+test_bbref_scrape.py
+Author: Eric Friedlander
+This file is design to be called by pytest to test bbref_scrape.py,
+the script for scraping data off of baseball reference.
+'''
+
 import sys
 import pandas as pd
 import pdb
@@ -5,14 +12,27 @@ sys.path.append('/Users/efriedlander/Dropbox/SportsBetting/mlb-predict')
 from src.data import bbref_scrape
 
 def test_BoxScoreScraper():
+    '''Function for testing the main box score scraper. This is done by comparing to
+    the Yankees-Orioles game played on July4th, 2016.'''
+
+    # hardcode correct url for game
     url = 'https://www.baseball-reference.com/boxes/BAL/BAL201606040.shtml'
+
+    # create scraper object and scrape box score
     scraper = bbref_scrape.BoxScoreScraper(url)
     scraper.scrape_box_score()
+
+    # retrieve box score object from scraper
     box_score = scraper.box_score
+
+    # test if linescore is correct
     compare_linescore(box_score)
 
 
 def compare_linescore(box_score):
+    '''Function to test whether linescore is correct'''
+
+    # Manually code correct linescore dataframe
     data = {'Team' : ['New York Yankees', 'Baltimore Orioles'],
                     '1' : [0, 0],
                     '2' : [0, 0],
@@ -27,4 +47,6 @@ def compare_linescore(box_score):
                     'H' : [16, 8],
                     'E' : [0, 0]}
     df = pd.DataFrame(data)
+
+    # Ensure the scraped linescore is correct
     assert(df.equals(box_score.linescore))
