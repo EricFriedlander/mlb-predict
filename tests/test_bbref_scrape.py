@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import pdb
 sys.path.append('/Users/efriedlander/Dropbox/SportsBetting/mlb-predict')
 from src.data import bbref_scrape
 
@@ -8,6 +9,7 @@ def test_BoxScoreScraper():
     scraper = bbref_scrape.BoxScoreScraper(url)
     scraper.scrape_box_score()
     box_score = scraper.box_score
+    compare_linescore(box_score)
 
 
 def compare_linescore(box_score):
@@ -25,4 +27,4 @@ def compare_linescore(box_score):
                     'H' : [16, 8],
                     'E' : [0, 0]}
     df = pd.DataFrame(data)
-    assert(df.equals(box_score.line_score))
+    assert(df.equals(box_score.linescore))
