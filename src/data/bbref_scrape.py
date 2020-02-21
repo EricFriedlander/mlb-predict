@@ -58,6 +58,9 @@ class BoxScoreScraper(object):
         # Create boxScore object to be populated
         self.box_score = BoxScore()
 
+        # Scrape scorebox
+        self.scrape_scorebox()
+
         # Scrape linescore table
         self.scrape_linescore()
 
