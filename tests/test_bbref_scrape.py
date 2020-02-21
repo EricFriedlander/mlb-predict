@@ -25,8 +25,23 @@ def test_BoxScoreScraper():
     # retrieve box score object from scraper
     box_score = scraper.box_score
 
+    # test if scorebox info is correct
+    compare_scorebox(box_score)
+
     # test if linescore is correct
     compare_linescore(box_score)
+
+
+def compare_scorebox(box_score):
+    '''Function to test whether scorebox info is correct'''
+    assert(box_score.away_team == 'New York Yankees')
+    assert(box_score.home_team == 'Baltimore Orioles')
+    assert(box_score.date == 'Saturday, June 4, 2016')
+    assert(box_score.time == '7:18 p.m. Local')
+    assert(box_score.attendance == 33170)
+    assert(box_score.venue == 'Oriole Park at Camden Yards')
+    assert(box_score.duration == '3:25')
+    assert(box_score.time_place == 'Night Game, on grass')
 
 
 def compare_linescore(box_score):
