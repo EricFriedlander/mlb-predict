@@ -34,6 +34,13 @@ class BoxScore(object):
         """ Sets the linescore"""
         self.linescore = df
 
+    def set_away_batting(self, df):
+        """ Sets batting stats for away team"""
+        self.away_batting = df
+
+    def set_home_batting(self, df):
+        """ Sets batting stats for home team"""
+
 class BoxScoreScraper(object):
     """Scraped a box score off of baseball reference.
     
@@ -64,6 +71,10 @@ class BoxScoreScraper(object):
         # Scrape linescore table
         self.scrape_linescore()
 
+        # Scrape batting data
+        self.box_score.set_away_batting(self.scrape_batting(self.box_score.away_team))
+        self.box_score.set_home_batting(self.scrape_batting(self.box_score.home_team))
+
     def scrape_scorebox(self):
         """Scrapes data from scorebox including home/away teams, date, start time, attendance, venue, duration, 
         then puts it in the classes BoxScore object."""
@@ -87,9 +98,6 @@ class BoxScoreScraper(object):
         # Put information in BoxScore object
         self.box_score.set_score_box_info(away_team, home_team, date, time, attendance, venue, duration, time_place)
 
-
-
-
     def scrape_linescore(self):
         """Scrapes basic overview of game including runs in each inning, hits, errors, final score, teams, and pitchers, 
         then puts it in the classes BoxScore object."""
@@ -100,3 +108,21 @@ class BoxScoreScraper(object):
         df.rename(columns = {df.columns[0] : 'Team'}, inplace=True)
         df[df.columns[1:]] = df[df.columns[1:]].astype('int')
         self.box_score.set_linescore(df)
+
+     def scrape_batting(self, team):
+        """Scrapes data from the batting table corresponding to the team (string) given as input returns dataframe of batting stats.
+            Returns Dataframe of batting stats."""
+        
+        # Get data, read to dataframe, clean/renaming some columns for readability
+        batting = content.find('table', id=box_score.team.replace(' ', '') + 'batting')
+        df = pd.read_html(batting.prettify(), flavor='lxml')[0]
+        df.rename(columns = {'Batting' : 'Player'}, inplace=True)
+        df = df[~df['Player'].isna()]
+
+        # Split out player name from positions and assign to new columns making sure to deal with team totals correctly
+        player_split = df['Player'][:-1].str.rsplit(' ', n=1, expand=True)
+        df['Player'][:-1] = player_split[0]
+        player_split[1][len(player_split[1])+1] = 'Total'
+        df.insert(1, 'Position', player_split[1])
+
+        return df
