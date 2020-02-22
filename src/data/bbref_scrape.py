@@ -109,7 +109,7 @@ class BoxScoreScraper(object):
         df[df.columns[1:]] = df[df.columns[1:]].astype('int')
         self.box_score.set_linescore(df)
 
-     def scrape_batting(self, team):
+    def scrape_batting(self, team):
         """Scrapes data from the batting table corresponding to the team (string) given as input returns dataframe of batting stats.
             Returns Dataframe of batting stats."""
         
