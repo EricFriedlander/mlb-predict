@@ -40,6 +40,7 @@ class BoxScore(object):
 
     def set_home_batting(self, df):
         """ Sets batting stats for home team"""
+        self.home_batting = df
 
 class BoxScoreScraper(object):
     """Scraped a box score off of baseball reference.
