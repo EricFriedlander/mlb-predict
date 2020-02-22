@@ -115,15 +115,16 @@ class BoxScoreScraper(object):
             Returns Dataframe of batting stats."""
         
         # Get data, read to dataframe, clean/renaming some columns for readability
-        batting = content.find('table', id=box_score.team.replace(' ', '') + 'batting')
+        batting = self.content.find('table', id=team.replace(' ', '') + 'batting')
         df = pd.read_html(batting.prettify(), flavor='lxml')[0]
         df.rename(columns = {'Batting' : 'Player'}, inplace=True)
-        df = df[~df['Player'].isna()]
+        df.dropna(subset=['Player'], inplace=True)
+        df.reset_index(inplace=True)
 
         # Split out player name from positions and assign to new columns making sure to deal with team totals correctly
         player_split = df['Player'][:-1].str.rsplit(' ', n=1, expand=True)
-        df['Player'][:-1] = player_split[0]
-        player_split[1][len(player_split[1])+1] = 'Total'
+        df['Player'][:-1] = player_split[0].str.strip()
+        player_split[1][len(player_split[1])] = 'Total'
         df.insert(1, 'Position', player_split[1])
 
         return df
