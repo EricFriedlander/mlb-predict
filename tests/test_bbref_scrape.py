@@ -5,10 +5,8 @@ This file is design to be called by pytest to test bbref_scrape.py,
 the script for scraping data off of baseball reference.
 '''
 
-import sys
 import pandas as pd
 import pdb
-sys.path.append('/Users/efriedlander/Dropbox/SportsBetting/mlb-predict')
 from src.data import bbref_scrape
 
 def test_BoxScoreScraper():
