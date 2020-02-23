@@ -99,6 +99,36 @@ def compare_batting_stats(box_score):
                     'Details' : ['SB', 'SB', np.nan, '2B', np.nan, '2B', 'GDP', '2B', '2B', np.nan, 'SF', np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]
                     }
     away_df = pd.DataFrame(away_data)
-    # import pdb; pdb.set_trace()
+
+
+    home_data = {'Player' : ['Adam Jones', 'Hyun Soo Kim', 'Nolan Reimold', 'Manny Machado', 'Chris Davis', 'Mark Trumbo', 'Matt Wieters', 'Pedro Alvarez',
+                                'Jonathan Schoop', 'Ryan Flaherty', 'Joey Rickard', 'Tyler Wilson', 'Dylan Bundy', 'Brian Duensing', 'Vance Worley', 
+                                'Team Totals'],
+                    'Position' : ['CF', 'LF', 'PH', 'SS', '1B', 'RF', 'C', 'DH', '2B', '3B', 'PH', 'P', 'P', 'P', 'P', 'Total'],
+                    'AB' : [4, 4, 1, 4, 4, 4, 3, 4, 4, 2, 1, np.nan, np.nan, np.nan, np.nan, 35],
+                    'R' : [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, np.nan, np.nan, np.nan, np.nan, 6], 
+                    'H' : [1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, np.nan, np.nan, np.nan, np.nan, 8],
+                    'RBI' : [3, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 6],
+                    'BB' : [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, np.nan, np.nan, np.nan, np.nan, 3],
+                    'SO' : [0, 0, 1, 0, 4, 1, 0, 1, 2, 0, 0, np.nan, np.nan, np.nan, np.nan, 9],
+                    'PA' : [5, 4, 1, 4, 4, 4, 4, 4, 4, 3, 1, np.nan, np.nan, np.nan, np.nan, 38],
+                    'BA' : [0.242, 0.382, 0.296, 0.311, 0.213, 0.296, 0.281, 0.217, 0.264, 0.2, 0.247, np.nan, np.nan, np.nan, np.nan, 0.229],
+                    'OBP' : [0.297, 0.455, 0.341, 0.377, 0.335, 0.348, 0.324, 0.301, 0.291, 0.299, 0.306, np.nan, np.nan, np.nan, np.nan, 0.289],
+                    'SLG' : [0.407, 0.5, 0.519, 0.598, 0.431, 0.601, 0.422, 0.408, 0.452, 0.227, 0.354, np.nan, np.nan, np.nan, np.nan, 0.514],
+                    'OPS' : [0.704, 0.955, 0.859, 0.975, 0.766, 0.949, 0.746, 0.71, 0.743, 0.526, 0.66, np.nan, np.nan, np.nan, np.nan, 0.804],
+                    'Pit' : [17, 13, 5, 16, 17, 14, 22, 18, 14, 12, 4, np.nan, np.nan, np.nan, np.nan, 152],
+                    'Str' : [10, 9, 4, 10, 13, 12, 9, 11, 12, 8, 3, np.nan, np.nan, np.nan, np.nan, 101],
+                    'WPA' : [0.14, -0.04, -0.049, -0.082, -0.07, -0.083, -0.036, -0.016, -0.011, 0.067, -0.031, np.nan, np.nan, np.nan, np.nan, -0.211],
+                    'aLI' : [1.1, 0.91, 1.69, 0.81, 0.65, 0.92, 0.8, 0.71, 1.27, 0.77, 1.23, np.nan, np.nan, np.nan, np.nan, 0.94],
+                    'WPA+' : [0.202, 0.04, 0, 0.002, 0, 0.01, 0.028, 0.04, 0.079, 0.077, 0, np.nan, np.nan, np.nan, np.nan, 0.478],
+                    'WPA-' : [-0.062, -0.08, -0.049, -0.085, -0.07, -0.093, -0.064, -0.056, -0.09, -0.01, -0.031, np.nan, np.nan, np.nan, np.nan, -0.69],
+                    'RE24' : [0.9, -0.2, -0.3, -0.6, -0.8, 0.4, 0.4, 1.2, 0.3, 0.3, -0.2, np.nan, np.nan, np.nan, np.nan, 1.3],
+                    'PO' : [5, 0, np.nan, 1, 10, 1, 6, np.nan, 1, 0, np.nan, 0, 1, 1, 1, 27],
+                    'A': [0, 0, np.nan, 3, 3, 0, 0, np.nan, 4, 1, np.nan, 2, 0, 0, 0, 13],
+                    'Details' : ['HR', '2B', np.nan, np.nan, np.nan, 'HR', np.nan, 'HR', np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]
+                    }
+    home_df = pd.DataFrame(home_data)
+
     # Ensure the scraped away batting is correct
     pd.testing.assert_frame_equal(box_score.away_batting, away_df)
+    pd.testing.assert_frame_equal(box_score.home_batting, home_df)
