@@ -119,11 +119,11 @@ class BoxScoreScraper(object):
         df = pd.read_html(batting.prettify(), flavor='lxml')[0]
         df.rename(columns = {'Batting' : 'Player'}, inplace=True)
         df.dropna(subset=['Player'], inplace=True)
-        df.reset_index(inplace=True)
+        df.reset_index(inplace=True, drop=True)
 
         # Split out player name from positions and assign to new columns making sure to deal with team totals correctly
         player_split = df['Player'][:-1].str.rsplit(' ', n=1, expand=True)
-        df['Player'][:-1] = player_split[0].str.strip()
+        df.iloc[:-1, df.columns.get_loc('Player')] = player_split[0].str.strip()
         player_split[1][len(player_split[1])] = 'Total'
         df.insert(1, 'Position', player_split[1])
 

@@ -65,7 +65,7 @@ def compare_linescore(box_score):
     df = pd.DataFrame(data)
 
     # Ensure the scraped linescore is correct
-    assert(df.equals(box_score.linescore))
+    pd.testing.assert_frame_equal(df, box_score.linescore)
 
 
 def compare_batting_stats(box_score):
@@ -78,12 +78,12 @@ def compare_batting_stats(box_score):
                     'Position' : ['CF', 'LF', 'RF', 'RF', 'DH', '2B', 'SS', '3B', '1B', '1B', 'C', 'C', 'P', 'P', 'P', 'P', 'Total'],
                     'AB' : [5, 5, 4, 1, 5, 5, 5, 4, 4, 0, 3, 0, np.nan, np.nan, np.nan, np.nan, 41],
                     'R' : [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 8], 
-                    'H' : [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 8],
-                    'RBI' : [0, 0, 0, 0, 1, 2, 1, 0, 1, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 16],
-                    'BB' : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 7],
-                    'SO' : [0, 0, 0, 0, 2, 1, 0, 0, 2, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 0],
-                    'PA' : [5, 5, 4, 1, 5, 5, 5, 4, 4, 0, 4, 0, np.nan, np.nan, np.nan, np.nan, 5],
-                    'BA' : [0.28, 0.225, 0.269, 0.202, 0.2, 0.254, 0.263, 0.239, 0.294, np.nan, 0.292, 0.224, np.nan, np.nan, np.nan, np.nan, 42],
+                    'H' : [2, 2, 1, 1, 3, 3, 1, 1, 1, 0, 1, 0, np.nan, np.nan, np.nan, np.nan, 16],
+                    'RBI' : [0, 0, 0, 0, 1, 2, 1, 0, 1, 0, 2, 0, np.nan, np.nan, np.nan, np.nan, 7],
+                    'BB' : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 0],
+                    'SO' : [0, 0, 0, 0, 2, 1, 0, 0, 2, 0, 0, 0, np.nan, np.nan, np.nan, np.nan, 5],
+                    'PA' : [5, 5, 4, 1, 5, 5, 5, 4, 4, 0, 4, 0, np.nan, np.nan, np.nan, np.nan, 42],
+                    'BA' : [0.28, 0.225, 0.269, 0.202, 0.2, 0.254, 0.263, 0.239, 0.294, np.nan, 0.292, 0.224, np.nan, np.nan, np.nan, np.nan, 0.39],
                     'OBP' : [0.342, 0.351, 0.3, 0.268, 0.257, 0.292, 0.29, 0.317, 0.294, np.nan, 0.309, 0.321, np.nan, np.nan, np.nan, np.nan, 0.381],
                     'SLG' : [0.417, 0.343, 0.528, 0.303, 0.438, 0.415, 0.371, 0.321, 0.529, np.nan, 0.462, 0.401, np.nan, np.nan, np.nan, np.nan, 0.488],
                     'OPS' : [0.759, 0.695, 0.828, 0.571, 0.695, 0.706, 0.661, 0.637, 0.824, np.nan, 0.77, 0.723, np.nan, np.nan, np.nan, np.nan, 0.869],
@@ -99,7 +99,6 @@ def compare_batting_stats(box_score):
                     'Details' : ['SB', 'SB', np.nan, '2B', np.nan, '2B', 'GDP', '2B', '2B', np.nan, 'SF', np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]
                     }
     away_df = pd.DataFrame(away_data)
-
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     # Ensure the scraped away batting is correct
-    assert(away_df.equals(box_score.away_batting))
+    pd.testing.assert_frame_equal(box_score.away_batting, away_df)
