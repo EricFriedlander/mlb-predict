@@ -32,6 +32,9 @@ def test_BoxScoreScraper():
     # test if battings stats are correct
     compare_batting_stats(box_score)
 
+    # test if pitching stats are correct
+    compare_pitching_stats(box_score)
+
 
 def compare_scorebox(box_score):
     '''Function to test whether scorebox info is correct'''
@@ -69,7 +72,7 @@ def compare_linescore(box_score):
 
 
 def compare_batting_stats(box_score):
-    '''Function to test whether batting stats is correct'''
+    '''Function to test whether batting stats are correct'''
 
     # Manually code correct batting dataframes
     away_data = {'Player' : ['Jacoby Ellsbury', 'Brett Gardner', 'Carlos Beltran', 'Aaron Hicks', 'Alex Rodriguez', 'Starlin Castro', 'Didi Gregorius', 
@@ -132,3 +135,71 @@ def compare_batting_stats(box_score):
     # Ensure the scraped away batting is correct
     pd.testing.assert_frame_equal(box_score.away_batting, away_df)
     pd.testing.assert_frame_equal(box_score.home_batting, home_df)
+
+
+def compare_pitching_stats(box_score):
+    '''Function to test whether pitching stats are correct'''
+
+    # Manually code correct batting dataframes
+    away_data = {'Player' : ['Ivan Nova', 'Nick Goody', 'Andrew Miller', 'Aroldis Chapman', 'Team Totals'],
+                    'Details' : ['W (4-3)', np.nan, 'H (8)', 'S (9)', 'Total'],
+                    'IP' : [6, 0, 2, 1, 9],
+                    'H' : [7, 1, 0, 0, 8],
+                    'R' : [5, 1, 0, 0, 6],
+                    'ER' : [5, 1, 0, 0, 6],
+                    'BB' : [2, 0, 0, 1, 3],
+                    'SO' : [6, 0, 2, 1, 9],
+                    'HR' : [2, 1, 0, 0, 3],
+                    'ERA' : [4.41, 4.3, 1.14, 2.38, 6],
+                    'BF' : [27, 1, 6, 4, 38],
+                    'Pit' : [103, 2, 28, 19, 152],
+                    'Str' : [71, 1, 17, 12, 101],
+                    'Ctct' : [44, 1, 7, 3, 55],
+                    'StS' : [13, 0, 6, 4, 23],
+                    'StL' : [14, 0, 4, 5, 23],
+                    'GB' : [8, 0, 2, 0, 10],
+                    'FB' : [11, 1, 2, 2, 16],
+                    'LD' : [5, 0, 0, 0, 5],
+                    'Unk' : [0, 0, 0, 0, 0],
+                    'GSc' : [42, np.nan, np.nan, np.nan, 42],
+                    'IR' : [np.nan, 2, 0, 0, 2],
+                    'IS' : [np.nan, 2, 0, 0, 2],
+                    'WPA' : [0.066, -0.203, 0.254, 0.095, 0.212],
+                    'aLI' : [0.63, 2.06, 1.65, 1.4, 0.94],
+                    'RE24' : [-0.9, -2, 1, 0.5, -1.3]
+                    }
+    away_df = pd.DataFrame(away_data)
+
+
+    home_data = {'Player' : ['Tyler Wilson', 'Dylan Bundy', 'Brian Duensing', 'Vance Worley', 'Team Totals'],
+                    'Details' : ['L (2-5)', np.nan, np.nan, np.nan, 'Total'],
+                    'IP' : [4, 2.2, 1.2, 0.2, 9],
+                    'H' : [7, 5, 1, 3, 16],
+                    'R' : [5, 2, 0, 1, 8],
+                    'ER' : [5, 2, 0, 1, 8],
+                    'BB' : [0, 0, 0, 0, 0],
+                    'SO' : [1, 3, 1, 0, 5],
+                    'HR' : [0, 0, 0, 0, 0],
+                    'ERA' : [4.39, 4.94, 6.75, 2.62, 8],
+                    'BF' : [19, 13, 6, 4, 42],
+                    'Pit' : [70, 51, 20, 13, 154],
+                    'Str' : [42, 36, 15, 8, 101],
+                    'Ctct' : [29, 23, 9, 8, 69],
+                    'StS' : [4, 3, 2, 0, 9],
+                    'StL' : [9, 10, 4, 0, 23],
+                    'GB' : [11, 3, 3, 3, 20],
+                    'FB' : [7, 7, 2, 1, 17],
+                    'LD' : [3, 4, 2, 1, 10],
+                    'Unk' : [0, 0, 0, 0, 0],
+                    'GSc' : [29, np.nan, np.nan, np.nan, 29],
+                    'IR' : [np.nan, 0, 0, 0, 0],
+                    'IS' : [np.nan, 0, 0, 0, 0],
+                    'WPA' : [-0.246, -0.026, 0.072, -0.089, -0.289],
+                    'aLI' : [0.87, 0.2, 0.47, 0.62, 0.57],
+                    'RE24' : [-2.9, -0.6, 0.9, -0.7, -3.3]
+                    }
+    home_df = pd.DataFrame(home_data)
+
+    # Ensure the scraped away batting is correct
+    pd.testing.assert_frame_equal(box_score.away_pitching, away_df)
+    pd.testing.assert_frame_equal(box_score.home_pitching, home_df)

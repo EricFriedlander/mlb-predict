@@ -42,6 +42,15 @@ class BoxScore(object):
         """ Sets batting stats for home team"""
         self.home_batting = df
 
+    def set_away_pitching(self, df):
+        """ Sets pitching stats for away team"""
+        self.away_pitching = df
+
+    def set_home_pitching(self, df):
+        """ Sets batting stats for home team"""
+        self.home_pitching = df
+
+
 class BoxScoreScraper(object):
     """Scraped a box score off of baseball reference.
     
@@ -75,6 +84,10 @@ class BoxScoreScraper(object):
         # Scrape batting data
         self.box_score.set_away_batting(self.scrape_batting(self.box_score.away_team))
         self.box_score.set_home_batting(self.scrape_batting(self.box_score.home_team))
+
+        # Scrape pitching data
+        self.box_score.set_away_pitching(self.scrape_pitching(self.box_score.away_team))
+        self.box_score.set_home_pitching(self.scrape_pitching(self.box_score.home_team))
 
     def scrape_scorebox(self):
         """Scrapes data from scorebox including home/away teams, date, start time, attendance, venue, duration, 
@@ -111,13 +124,13 @@ class BoxScoreScraper(object):
         self.box_score.set_linescore(df)
 
     def scrape_batting(self, team):
-        """Scrapes data from the batting table corresponding to the team (string) given as input returns dataframe of batting stats.
+        """Scrapes data from the batting table corresponding to the team (string) given as input.
             Returns Dataframe of batting stats."""
         
         # Get data, read to dataframe, clean/renaming some columns for readability
         batting = self.content.find('table', id=team.replace(' ', '') + 'batting')
         df = pd.read_html(batting.prettify(), flavor='lxml')[0]
-        df.rename(columns = {'Batting' : 'Player'}, inplace=True)
+        df.rename(columns={'Batting' : 'Player'}, inplace=True)
         df.dropna(subset=['Player'], inplace=True)
         df.reset_index(inplace=True, drop=True)
 
@@ -126,5 +139,22 @@ class BoxScoreScraper(object):
         df.iloc[:-1, df.columns.get_loc('Player')] = player_split[0].str.strip()
         player_split[1][len(player_split[1])] = 'Total'
         df.insert(1, 'Position', player_split[1])
+
+        return df
+
+    def scrape_pitching(self, team):
+        """Scrapes data from the pitching table corresponding to the team (string) given as input.
+            Returns Dataframe of pitching stats."""
+        
+        # Get data, read to dataframe, clean/renaming some columns for readability
+        pitching = self.content.find('table', id=team.replace(' ', '') + 'pitching')
+        df = pd.read_html(pitching.prettify(), flavor='lxml')[0]
+        df.rename(columns= {'Pitching' : 'Player'}, inplace=True)
+
+        # Split out player name from details and assign to new columns making sure to deal with team totals correctly
+        player_split = df['Player'][:-1].str.rsplit(', ', n=1, expand=True)
+        df.iloc[:-1, df.columns.get_loc('Player')] = player_split[0].str.strip()
+        player_split[1][len(player_split[1])] = 'Total'
+        df.insert(1, 'Details', player_split[1])
 
         return df
