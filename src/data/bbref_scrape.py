@@ -8,6 +8,7 @@ import requests
 import bs4
 import pandas as pd
 import re
+import datetime
 class BoxScore(object):
     """Represents a box score from baseball reference.
     
@@ -158,3 +159,40 @@ class BoxScoreScraper(object):
         df.insert(1, 'Details', player_split[1])
 
         return df
+
+
+def get_box_score(team, first_date, last_date):
+    """ 
+    Scrapes box score data from a specified team between two dates.
+  
+    This function navigates to the appropraite team back on baseballreference and then iterates through
+    all gaames between the specified dates and scrapes the box scores.
+  
+    Parameters: 
+    Team (str): Team whose data to scrape, must be in the three-character abbreviation:
+    'ATL', 'ARI', 'BAL', 'BOS', 'CHC', 'CHW', 'CIN', 'CLE', 'COL', 'DET',
+    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
+    'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN'
+  
+    Returns: 
+    List of BoxScore objects for all the requested games.
+
+    """
+
+    team_abbrv = ['ATL', 'ARI', 'BAL', 'BOS', 'CHC', 'CHW', 'CIN', 'CLE', 'COL', 'DET',
+                    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
+                    'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN']
+
+    if team not in team_abbrv:
+        raise Exception('Team specified must be one of the three-character abbreviations using in baseball \
+                            reference. See docstring for more information.')
+    
+    # Extract first and last years
+    first_year = first_date.year
+    last_year = last_date.year
+
+    for year in range(first_year, last_year+1):
+        url = 'https://www.baseball-reference.com/teams/' + str(team) + '/' + str(year) + '-schedule-scores.shtml'
+
+
+
