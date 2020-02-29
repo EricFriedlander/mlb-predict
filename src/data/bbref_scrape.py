@@ -9,6 +9,8 @@ import bs4
 import pandas as pd
 import re
 import datetime
+import dateparser
+import time
 class BoxScore(object):
     """Represents a box score from baseball reference.
     
@@ -121,7 +123,7 @@ class BoxScoreScraper(object):
         df = df.drop(df.columns[0], axis=1)
         df = df.drop(2)
         df.rename(columns = {df.columns[0] : 'Team'}, inplace=True)
-        df[df.columns[1:]] = df[df.columns[1:]].astype('int')
+        df[df.columns[1:]] = df[df.columns[1:]].replace('X', None).astype('int')
         self.box_score.set_linescore(df)
 
     def scrape_batting(self, team):
@@ -161,7 +163,7 @@ class BoxScoreScraper(object):
         return df
 
 
-def get_box_score(team, first_date, last_date):
+def get_box_scores(team, first_date, last_date):
     """ 
     Scrapes box score data from a specified team between two dates.
   
@@ -191,8 +193,37 @@ def get_box_score(team, first_date, last_date):
     first_year = first_date.year
     last_year = last_date.year
 
+    # Initialize output
+    box_scores = []
+
+    # Iterate through each year in range
     for year in range(first_year, last_year+1):
+        # import pdb; pdb.set_trace()
+        # Scrape list of games
         url = 'https://www.baseball-reference.com/teams/' + str(team) + '/' + str(year) + '-schedule-scores.shtml'
+        res = requests.get(url)
+        comm = re.compile("<!--|-->")
+        soup = bs4.BeautifulSoup(comm.sub("", res.text), 'lxml')
+        content = soup.find('div', id = "content")
+        schedule = content.find('table', id='team_schedule')
+        schedule_rows = schedule.find_all('tr')
+        
+        # Iterate through rows
+        for row in schedule_rows:
+            date_col = row.find('td', {'data-stat' : 'date_game'})
+            if date_col:
+                print(date_col.text)
+                date = dateparser.parse(date_col.text.split(' (')[0])
+                date = date.replace(year = year)
+                print(date)
+                # import pdb; pdb.set_trace()
+                if first_date <= date <= last_date:
+                    time.sleep(2)
+                    box_url = 'https://www.baseball-reference.com' + row.find('td', {'data-stat' : 'boxscore'}).a['href']
+                    print('Scraping from ' + box_url)
+                    scraper = BoxScoreScraper(box_url)
+                    scraper.scrape_box_score()
+                    box_scores.append(scraper. box_score)
 
-
+    return box_scores
 
