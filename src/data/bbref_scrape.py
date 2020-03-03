@@ -8,6 +8,7 @@ import requests
 import bs4
 import pandas as pd
 import re
+import numpy as np
 import datetime
 import dateparser
 import time
@@ -105,12 +106,21 @@ class BoxScoreScraper(object):
         # Get meta information
         scorebox_meta = scorebox.find('div', {'class' : 'scorebox_meta'}).find_all('div')
         date = scorebox_meta[0].text
-        time = scorebox_meta[1].text.split(':', 1)[1].strip()
-        attendance = scorebox_meta[2].text.split(':', 1)[1].strip()
-        attendance = int(attendance.replace(',', ''))
-        venue = scorebox_meta[3].text.split(':', 1)[1].strip()
-        duration = scorebox_meta[4].text.split(':', 1)[1].strip()
-        time_place = scorebox_meta[5].text.strip()
+
+        # Set everything to NaN in case not included
+        time = attendance = venue = duration = time_place = np.nan
+        for line in scorebox_meta:
+            if 'Start Time' in line.text:
+                time = line.text.split(':', 1)[1].strip()
+            elif 'Attendance' in line.text:
+                attendance = line.text.split(':', 1)[1].strip()
+                attendance = int(attendance.replace(',', ''))
+            elif 'Venue' in line.text:
+                venue = line.text.split(':', 1)[1].strip()
+            elif 'Duration' in line.text:
+                duration = line.text.split(':', 1)[1].strip()
+            elif 'Game, on' in line.text:    
+                time_place = line.text.strip()
 
         # Put information in BoxScore object
         self.box_score.set_score_box_info(away_team, home_team, date, time, attendance, venue, duration, time_place)
