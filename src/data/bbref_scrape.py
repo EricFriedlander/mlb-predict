@@ -223,3 +223,26 @@ def get_box_score_links(team, first_date, last_date):
                     
     return links
 
+def get_box_scores(links):
+    """ 
+    Scrapes box scores from set of provided links.
+  
+    This function iterates through the links provided and scrapes the corresponding box scores.
+  
+    Parameters: 
+    links (DataFrame) : DataFrame with two columns, "Date" and "URL"
+    Returns: 
+    List of boxscore objects for all the requested games.
+
+    """
+
+    box_scores = []
+    for row in links.itertuples(index=False):
+        time.sleep(2)
+        # import pdb; pdb.set_trace()
+        scraper = BoxScoreScraper(row[1])
+        scraper.scrape_box_score()
+        box_scores.append(scraper.box_score)
+
+    return box_scores
+    
