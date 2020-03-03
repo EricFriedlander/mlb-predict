@@ -163,12 +163,12 @@ class BoxScoreScraper(object):
         return df
 
 
-def get_box_scores(team, first_date, last_date):
+def get_box_score_links(team, first_date, last_date):
     """ 
-    Scrapes box score data from a specified team between two dates.
+    Scrapes links to box score data from a specified team between two dates.
   
     This function navigates to the appropraite team back on baseballreference and then iterates through
-    all gaames between the specified dates and scrapes the box scores.
+    all gaames between the specified dates and scrapes the box score links.
   
     Parameters: 
     Team (str): Team whose data to scrape, must be in the three-character abbreviation:
@@ -177,7 +177,7 @@ def get_box_scores(team, first_date, last_date):
     'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN'
   
     Returns: 
-    List of BoxScore objects for all the requested games.
+    Dataframe with dates and links to boxscores for all the requested games.
 
     """
 
@@ -194,7 +194,7 @@ def get_box_scores(team, first_date, last_date):
     last_year = last_date.year
 
     # Initialize output
-    box_scores = []
+    links = pd.DataFrame(columns=['Date', 'URL'])
 
     # Iterate through each year in range
     for year in range(first_year, last_year+1):
@@ -212,18 +212,14 @@ def get_box_scores(team, first_date, last_date):
         for row in schedule_rows:
             date_col = row.find('td', {'data-stat' : 'date_game'})
             if date_col:
-                print(date_col.text)
+                # print(date_col.text)
                 date = dateparser.parse(date_col.text.split(' (')[0])
                 date = date.replace(year = year)
-                print(date)
+                print(str(date) + '      ', end='\r')
                 # import pdb; pdb.set_trace()
                 if first_date <= date <= last_date:
-                    time.sleep(2)
                     box_url = 'https://www.baseball-reference.com' + row.find('td', {'data-stat' : 'boxscore'}).a['href']
-                    print('Scraping from ' + box_url)
-                    scraper = BoxScoreScraper(box_url)
-                    scraper.scrape_box_score()
-                    box_scores.append(scraper. box_score)
-
-    return box_scores
+                    links = links.append({'Date' : date, 'URL' : box_url}, ignore_index=True)
+                    
+    return links
 
