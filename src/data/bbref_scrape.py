@@ -173,8 +173,9 @@ def get_box_score_links(team, first_date, last_date):
     Parameters: 
     Team (str): Team whose data to scrape, must be in the three-character abbreviation:
     'ATL', 'ARI', 'BAL', 'BOS', 'CHC', 'CHW', 'CIN', 'CLE', 'COL', 'DET',
-    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
-    'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN'
+    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'FLA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
+    'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN',
+    'ALL' - denotes all teams
   
     Returns: 
     Dataframe with dates and links to boxscores for all the requested games.
@@ -182,12 +183,17 @@ def get_box_score_links(team, first_date, last_date):
     """
 
     team_abbrv = ['ATL', 'ARI', 'BAL', 'BOS', 'CHC', 'CHW', 'CIN', 'CLE', 'COL', 'DET',
-                    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
+                    'KCR', 'HOU', 'LAA', 'LAD', 'MIA', 'FLA', 'MIL', 'MIN', 'NYM', 'NYY', 'OAK',
                     'PHI', 'PIT', 'SDP', 'SEA', 'SFG', 'STL', 'TBR', 'TEX', 'TOR', 'WSN']
 
-    if team not in team_abbrv:
+    if team not in team_abbrv and team != 'ALL':
         raise Exception('Team specified must be one of the three-character abbreviations using in baseball \
                             reference. See docstring for more information.')
+
+    if team == 'ALL':
+        team_list = team_abbrv
+    else:
+        team_list = [team]
     
     # Extract first and last years
     first_year = first_date.year
@@ -198,30 +204,38 @@ def get_box_score_links(team, first_date, last_date):
 
     # Iterate through each year in range
     for year in range(first_year, last_year+1):
-        # import pdb; pdb.set_trace()
-        # Scrape list of games
-        url = 'https://www.baseball-reference.com/teams/' + str(team) + '/' + str(year) + '-schedule-scores.shtml'
-        res = requests.get(url)
-        comm = re.compile("<!--|-->")
-        soup = bs4.BeautifulSoup(comm.sub("", res.text), 'lxml')
-        content = soup.find('div', id = "content")
-        schedule = content.find('table', id='team_schedule')
-        schedule_rows = schedule.find_all('tr')
-        
-        # Iterate through rows
-        for row in schedule_rows:
-            date_col = row.find('td', {'data-stat' : 'date_game'})
-            if date_col:
-                # print(date_col.text)
-                date = dateparser.parse(date_col.text.split(' (')[0])
-                date = date.replace(year = year)
-                print(str(date) + '      ', end='\r')
-                # import pdb; pdb.set_trace()
-                if first_date <= date <= last_date:
-                    box_url = 'https://www.baseball-reference.com' + row.find('td', {'data-stat' : 'boxscore'}).a['href']
-                    links = links.append({'Date' : date, 'URL' : box_url}, ignore_index=True)
-                    
-    return links
+        # Replace MIA with FLA since Florida Marlins became MIAMI Marlins in 2011
+        if year <= 2011:
+            team_list = ['FLA' if  x=='MIA' else x for x in team_list]
+        else:
+            team_list = ['MIA' if  x=='FLA' else x for x in team_list]
+        # Iterate through each requested team
+        for team_iter in team_list:
+            # import pdb; pdb.set_trace()
+            # Scrape list of games
+            url = 'https://www.baseball-reference.com/teams/' + str(team_iter) + '/' + str(year) + '-schedule-scores.shtml'
+            res = requests.get(url)
+            comm = re.compile("<!--|-->")
+            soup = bs4.BeautifulSoup(comm.sub("", res.text), 'lxml')
+            content = soup.find('div', id = "content")
+            schedule = content.find('table', id='team_schedule')
+            print(team_iter, end='\r')
+            schedule_rows = schedule.find_all('tr')
+            
+            # Iterate through rows
+            for row in schedule_rows:
+                date_col = row.find('td', {'data-stat' : 'date_game'})
+                if date_col:
+                    # print(date_col.text)
+                    date = dateparser.parse(date_col.text.split(' (')[0])
+                    date = date.replace(year = year)
+                    print(str(date) + '      ', end='\r')
+                    # import pdb; pdb.set_trace()
+                    if first_date <= date <= last_date:
+                        box_url = 'https://www.baseball-reference.com' + row.find('td', {'data-stat' : 'boxscore'}).a['href']
+                        links = links.append({'Date' : date, 'URL' : box_url}, ignore_index=True)
+                        
+    return links.drop_duplicates()
 
 def get_box_scores(links):
     """ 
@@ -245,4 +259,5 @@ def get_box_scores(links):
         box_scores.append(scraper.box_score)
 
     return box_scores
+
     
