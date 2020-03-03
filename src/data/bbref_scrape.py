@@ -121,7 +121,7 @@ class BoxScoreScraper(object):
         table = self.content.find('table', {'class' : "linescore"})
         df = pd.read_html(table.prettify(), flavor='lxml')[0]
         df = df.drop(df.columns[0], axis=1)
-        df = df.drop(2)
+        df = df.truncate(after=1, axis='rows')
         df.rename(columns = {df.columns[0] : 'Team'}, inplace=True)
         df[df.columns[1:]] = df[df.columns[1:]].replace('X', None).astype('int')
         self.box_score.set_linescore(df)
@@ -131,7 +131,7 @@ class BoxScoreScraper(object):
             Returns Dataframe of batting stats."""
         
         # Get data, read to dataframe, clean/renaming some columns for readability
-        batting = self.content.find('table', id=team.replace(' ', '') + 'batting')
+        batting = self.content.find('table', id=team.replace(' ', '').replace('.', '') + 'batting')
         df = pd.read_html(batting.prettify(), flavor='lxml')[0]
         df.rename(columns={'Batting' : 'Player'}, inplace=True)
         df.dropna(subset=['Player'], inplace=True)
@@ -150,7 +150,7 @@ class BoxScoreScraper(object):
             Returns Dataframe of pitching stats."""
         
         # Get data, read to dataframe, clean/renaming some columns for readability
-        pitching = self.content.find('table', id=team.replace(' ', '') + 'pitching')
+        pitching = self.content.find('table', id=team.replace(' ', '').replace('.', '') + 'pitching')
         df = pd.read_html(pitching.prettify(), flavor='lxml')[0]
         df.rename(columns= {'Pitching' : 'Player'}, inplace=True)
 
@@ -253,7 +253,7 @@ def get_box_scores(links):
     box_scores = []
     for row in links.itertuples(index=False):
         time.sleep(2)
-        # import pdb; pdb.set_trace()
+        print('Scraping ' + row[1], end='\r')
         scraper = BoxScoreScraper(row[1])
         scraper.scrape_box_score()
         box_scores.append(scraper.box_score)
