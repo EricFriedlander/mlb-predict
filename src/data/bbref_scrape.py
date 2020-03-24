@@ -270,4 +270,118 @@ def get_box_scores(links):
 
     return box_scores
 
-    
+
+def parse_box_scores(scores):
+    """ 
+    Converts list of boxscore objects into aggregate datasets.
+  
+    This function iterates through the link os Box Scores provided and outputs [insert].
+  
+    Parameters: 
+    scores (List of BoxScore object) : List of boxscores to be included in output datasets.
+
+    Returns: 
+    DataFrames of game-by-game, game-level, team-level, batter-level, pitcher-level data.
+    """
+
+    # Predefine output dataframes
+    game_level = pd.DataFrame(columns=['GameID', 'AwayTeam', 'HomeTeam', 'Date', 'Time' , 'Attendance', 'Venue', 'Duration', 'Details',
+                                        'AwayScore', 'HomeScore'])
+    team_level = pd.DataFrame(columns=['GameID', 'Team', 'HomeAway', 'Inn1', 'Inn2', 'Inn3', 'Inn4', 'Inn5', 'Inn6', 'Inn7', 'Inn8', 'Inn9', 
+                                        'Inn9Total', 'Runs', 'Hits', 'Errors', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA', 'OBP', 'SLG', 'OPS', 'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A',
+                                        'Starter', 'IP', 'H_P', 'R_P', 'ER', 'BB_P', 'SO_P', 'HR_P', 'ERA', 'BF', 'Pit_P', 'Str_P', 'Ctct', 'StS', 'StL', 'GB', 'FB', 'LD', 'Unk', 'GSc', 'IR', 'IS', 'WPA_P', 'aLI_P', 'RE24_P'])
+    player_level = pd.DataFrame(columns=['GameID', 'Player', 'Position', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA', 'OBP', 'SLG', 'OPS', 
+                                        'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A', 'Details'])
+
+    # Iterate through all box scores
+    for box_score in scores:
+        # Generate unique game id
+        game_id = hash(box_score.away_team + box_score.home_team + box_score.date + box_score.time)
+
+        # Convert date and time to datetime object if it exists
+        new_date = dateparser.parse(box_score.date)
+        if isinstance(box_score.time, str):
+            new_time = dateparser.parse(box_score.time)
+        else:
+            new_time = box_score.time
+        
+        # Populate row of game level dataframe
+        linescore = box_score.linescore
+        game_level = game_level.append({'GameID' : game_id,
+                            'AwayTeam' : box_score.away_team,
+                            'HomeTeam' : box_score.home_team,
+                            'Date' : new_date,
+                            'Time' : new_time,
+                            'Attendance' : box_score.attendance,
+                            'Venue' : box_score.venue,
+                            'Duration' : box_score.duration,
+                            'Details' : box_score.time_place,
+                            'AwayScore' : linescore.loc[0, 'R'],
+                            'HomeScore' : linescore.loc[1, 'R']}, ignore_index=True)
+
+        # Populate team level dataframes
+        team_level = team_level.append({'GameID' : game_id,
+                                    'Team' : box_score.away_team,
+                                    'HomeAway' : 'Away',
+                                    'Inn1' : linescore.loc[0, '1'],
+                                    'Inn2' : linescore.loc[0, '2'],
+                                    'Inn3' : linescore.loc[0, '3'],
+                                    'Inn4' : linescore.loc[0, '4'],
+                                    'Inn5' : linescore.loc[0, '5'],
+                                    'Inn6' : linescore.loc[0, '6'],
+                                    'Inn7' : linescore.loc[0, '7'],
+                                    'Inn8' : linescore.loc[0, '8'],
+                                    'Inn9' : linescore.loc[0, '9'],
+                                    'Inn9Total' : np.sum(linescore.iloc[0, 1:10]),
+                                    'Runs' : linescore.loc[0, 'R'],
+                                    'Hits' : linescore.loc[0, 'H'],
+                                    'Errors' : linescore.loc[0, 'E'],
+                                    'AB' : box_score.away_batting.iloc[-1]['AB'], 
+                                    'R' : box_score.away_batting.iloc[-1]['R'], 
+                                    'RBI' : box_score.away_batting.iloc[-1]['RBI'], 
+                                    'BB': box_score.away_batting.iloc[-1]['BB'], 
+                                    'SO' : box_score.away_batting.iloc[-1]['SO'], 
+                                    'PA' : box_score.away_batting.iloc[-1]['PA'], 
+                                    'BA' : box_score.away_batting.iloc[-1]['BA'],
+                                    'OBP' : box_score.away_batting.iloc[-1]['OBP'], 
+                                    'SLG' : box_score.away_batting.iloc[-1]['SLG'], 
+                                    'OPS' : box_score.away_batting.iloc[-1]['OPS'], 
+                                    'Pit' : box_score.away_batting.iloc[-1]['Pit'], 
+                                    'Str' : box_score.away_batting.iloc[-1]['Str'], 
+                                    'WPA' : box_score.away_batting.iloc[-1]['WPA'], 
+                                    'aLI' : box_score.away_batting.iloc[-1]['aLI'], 
+                                    'WPA+' : box_score.away_batting.iloc[-1]['WPA+'], 
+                                    'WPA-' : box_score.away_batting.iloc[-1]['WPA-'], 
+                                    'RE24' : box_score.away_batting.iloc[-1]['RE24'],
+                                    'PO' : box_score.away_batting.iloc[-1]['PO'],
+                                    'A' : box_score.away_batting.iloc[-1]['A'],
+                                    'Starter' : box_score.away_pitching.iloc[0, 0],
+                                    'IP' : box_score.away_pitching.iloc[-1]['IP'], 
+                                    'H_P' : box_score.away_pitching.iloc[-1]['H'], 
+                                    'R_P' : box_score.away_pitching.iloc[-1]['R'], 
+                                    'ER' : box_score.away_pitching.iloc[-1]['ER'], 
+                                    'BB_P' : box_score.away_pitching.iloc[-1]['BB'], 
+                                    'SO_P' : box_score.away_pitching.iloc[-1]['SO'], 
+                                    'HR_P' : box_score.away_pitching.iloc[-1]['HR'], 
+                                    'ERA' : box_score.away_pitching.iloc[-1]['ERA'],
+                                    'BF' : box_score.away_pitching.iloc[-1]['BF'], 
+                                    'Pit_P' : box_score.away_pitching.iloc[-1]['Pit'], 
+                                    'Str_P' : box_score.away_pitching.iloc[-1]['Str'], 
+                                    'Ctct' : box_score.away_pitching.iloc[-1]['Ctct'], 
+                                    'StS' : box_score.away_pitching.iloc[-1]['StS'], 
+                                    'StL' : box_score.away_pitching.iloc[-1]['StL'] , 
+                                    'GB' : box_score.away_pitching.iloc[-1]['GB'], 
+                                    'FB' : box_score.away_pitching.iloc[-1]['FB'], 
+                                    'LD' : box_score.away_pitching.iloc[-1]['LD'], 
+                                    'Unk' : box_score.away_pitching.iloc[-1]['Unk'],
+                                    'GSc' : box_score.away_pitching.iloc[-1]['GSc'], 
+                                    'IR' : box_score.away_pitching.iloc[-1]['IR'], 
+                                    'IS' : box_score.away_pitching.iloc[-1]['IS'], 
+                                    'WPA_P' : box_score.away_pitching.iloc[-1]['WPA'], 
+                                    'aLI_P' : box_score.away_pitching.iloc[-1]['aLI'], 
+                                    'RE24_P' : box_score.away_pitching.iloc[-1]['RE24']}, ignore_index=True)
+
+
+
+
+    return game_level, team_level
