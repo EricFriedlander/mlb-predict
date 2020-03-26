@@ -281,7 +281,7 @@ def parse_box_scores(scores):
     scores (List of BoxScore object) : List of boxscores to be included in output datasets.
 
     Returns: 
-    DataFrames of game-by-game, game-level, team-level, batter-level, pitcher-level data.
+    DataFrames of game-by-game, game-level, batter-level, pitcher-level data.
     """
 
     # Predefine output dataframes
