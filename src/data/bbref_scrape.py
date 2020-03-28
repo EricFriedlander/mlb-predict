@@ -289,7 +289,7 @@ def parse_box_scores(scores):
                                         'AwayScore', 'HomeScore'])
 
     team_level = pd.DataFrame(columns=['GameID', 'Team', 'HomeAway', 'Inn1', 'Inn2', 'Inn3', 'Inn4', 'Inn5', 'Inn6', 'Inn7', 'Inn8', 'Inn9', 
-                                        'Inn9Total', 'Runs', 'Hits', 'Errors', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA', 'OBP', 'SLG', 'OPS', 'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A',
+                                        'Runs', 'Hits', 'Errors', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA', 'OBP', 'SLG', 'OPS', 'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A',
                                         'Starter', 'IP', 'H_P', 'R_P', 'ER', 'BB_P', 'SO_P', 'HR_P', 'ERA', 'BF', 'Pit_P', 'Str_P', 'Ctct', 'StS', 'StL', 'GB', 'FB', 'LD', 'Unk', 'GSc', 'IR', 'IS', 'WPA_P', 'aLI_P', 'RE24_P'])
 
     batter_level = pd.DataFrame(columns=['GameID', 'Player', 'Team', 'HomeAway', 'Position', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA',                                             'OBP', 'SLG', 'OPS', 'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A', 'Details'])
@@ -298,9 +298,10 @@ def parse_box_scores(scores):
                                             'aLI', 'RE24'])
 
     # Iterate through all box scores
-    for box_score in scores:    
+    for i, box_score in enumerate(scores):    
+
         # Generate unique game id
-        game_id = hash(box_score.away_team + box_score.home_team + box_score.date + box_score.time)
+        game_id = hash(box_score.away_team + box_score.home_team + str(box_score.date) + str(box_score.time))
 
         # Convert date and time to datetime object if it exists
         new_date = dateparser.parse(box_score.date)
@@ -327,16 +328,15 @@ def parse_box_scores(scores):
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.away_team,
                                     'HomeAway' : 'Away',
-                                    'Inn1' : linescore.loc[0, '1'],
-                                    'Inn2' : linescore.loc[0, '2'],
-                                    'Inn3' : linescore.loc[0, '3'],
-                                    'Inn4' : linescore.loc[0, '4'],
-                                    'Inn5' : linescore.loc[0, '5'],
-                                    'Inn6' : linescore.loc[0, '6'],
-                                    'Inn7' : linescore.loc[0, '7'],
-                                    'Inn8' : linescore.loc[0, '8'],
-                                    'Inn9' : linescore.loc[0, '9'],
-                                    'Inn9Total' : np.sum(linescore.iloc[0, 1:10]),
+                                    'Inn1' : (linescore.loc[0, '1'] if '1' in linescore.columns else np.nan),
+                                    'Inn2' : (linescore.loc[0, '2'] if '2' in linescore.columns else np.nan),
+                                    'Inn3' : (linescore.loc[0, '3'] if '3' in linescore.columns else np.nan),
+                                    'Inn4' : (linescore.loc[0, '4'] if '4' in linescore.columns else np.nan),
+                                    'Inn5' : (linescore.loc[0, '5'] if '5' in linescore.columns else np.nan),
+                                    'Inn6' : (linescore.loc[0, '6'] if '6' in linescore.columns else np.nan),
+                                    'Inn7' : (linescore.loc[0, '7'] if '7' in linescore.columns else np.nan),
+                                    'Inn8' : (linescore.loc[0, '8'] if '8' in linescore.columns else np.nan),
+                                    'Inn9' : (linescore.loc[0, '9'] if '9' in linescore.columns else np.nan),
                                     'Runs' : linescore.loc[0, 'R'],
                                     'Hits' : linescore.loc[0, 'H'],
                                     'Errors' : linescore.loc[0, 'E'],
@@ -388,16 +388,15 @@ def parse_box_scores(scores):
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.home_team,
                                     'HomeAway' : 'Home',
-                                    'Inn1' : linescore.loc[0, '1'],
-                                    'Inn2' : linescore.loc[0, '2'],
-                                    'Inn3' : linescore.loc[0, '3'],
-                                    'Inn4' : linescore.loc[0, '4'],
-                                    'Inn5' : linescore.loc[0, '5'],
-                                    'Inn6' : linescore.loc[0, '6'],
-                                    'Inn7' : linescore.loc[0, '7'],
-                                    'Inn8' : linescore.loc[0, '8'],
-                                    'Inn9' : linescore.loc[0, '9'],
-                                    'Inn9Total' : np.sum(linescore.iloc[0, 1:10]),
+                                    'Inn1' : (linescore.loc[1, '1'] if '1' in linescore.columns else np.nan),
+                                    'Inn2' : (linescore.loc[1, '2'] if '2' in linescore.columns else np.nan),
+                                    'Inn3' : (linescore.loc[1, '3'] if '3' in linescore.columns else np.nan),
+                                    'Inn4' : (linescore.loc[1, '4'] if '4' in linescore.columns else np.nan),
+                                    'Inn5' : (linescore.loc[1, '5'] if '5' in linescore.columns else np.nan),
+                                    'Inn6' : (linescore.loc[1, '6'] if '6' in linescore.columns else np.nan),
+                                    'Inn7' : (linescore.loc[1, '7'] if '7' in linescore.columns else np.nan),
+                                    'Inn8' : (linescore.loc[1, '8'] if '8' in linescore.columns else np.nan),
+                                    'Inn9' : (linescore.loc[1, '9'] if '9' in linescore.columns else np.nan),
                                     'Runs' : linescore.loc[0, 'R'],
                                     'Hits' : linescore.loc[0, 'H'],
                                     'Errors' : linescore.loc[0, 'E'],
