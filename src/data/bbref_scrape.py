@@ -22,7 +22,8 @@ class BoxScore(object):
 
     """
 
-    def set_score_box_info(self, away, home, date, time, attendance, venue, duration, time_place):
+    def set_score_box_info(self, away, home, date, time, attendance, venue, duration, time_place, 
+                            away_wins, away_losses, home_wins, home_losses):
         """Sets all values associated with the score_box"""
         self.away_team = away
         self.home_team = home
@@ -32,6 +33,12 @@ class BoxScore(object):
         self.venue = venue
         self.duration = duration
         self.time_place = time_place
+        self.away_wins = away_wins
+        self.away_losses = away_losses
+        self.away_games = away_wins + away_losses
+        self.home_wins = home_wins
+        self.home_losses = home_losses
+        self.home_games = home_wins+home_losses
 
        
     def set_linescore(self, df):
@@ -98,10 +105,13 @@ class BoxScoreScraper(object):
         then puts it in the classes BoxScore object."""
         scorebox = self.content.find('div', {'class' : 'scorebox'})
 
-        # Get home/away teams
+        # Get home/away teams and records
         teams = scorebox.find_all('a', {'itemprop' : "name"})
         away_team = teams[0].text
         home_team = teams[1].text
+        scorebox_divs = scorebox.find_all('div')
+        away_record = scorebox_divs[5].text.split('-')
+        home_record = scorebox_divs[5].text.split('-')
 
         # Get meta information
         scorebox_meta = scorebox.find('div', {'class' : 'scorebox_meta'}).find_all('div')
@@ -123,7 +133,8 @@ class BoxScoreScraper(object):
                 time_place = line.text.strip()
 
         # Put information in BoxScore object
-        self.box_score.set_score_box_info(away_team, home_team, date, time, attendance, venue, duration, time_place)
+        self.box_score.set_score_box_info(away_team, home_team, date, time, attendance, venue, duration, time_place, 
+                                            away_record[0], away_record[1], home_record[0], home_record[1])
 
     def scrape_linescore(self):
         """Scrapes basic overview of game including runs in each inning, hits, errors, final score, teams, and pitchers, 
@@ -285,7 +296,7 @@ def parse_box_scores(scores):
     """
 
     # Predefine output dataframes
-    game_level = pd.DataFrame(columns=['GameID', 'AwayTeam', 'HomeTeam', 'Date', 'Time' , 'Attendance', 'Venue', 'Duration', 'Details',
+    game_level = pd.DataFrame(columns=['GameID', 'AwayTeam', 'HomeTeam', 'DateTime' , 'Attendance', 'Venue', 'Duration', 'Details',
                                         'AwayScore', 'HomeScore'])
 
     team_level = pd.DataFrame(columns=['GameID', 'Team', 'HomeAway', 'Inn1', 'Inn2', 'Inn3', 'Inn4', 'Inn5', 'Inn6', 'Inn7', 'Inn8', 'Inn9', 
@@ -304,19 +315,18 @@ def parse_box_scores(scores):
         game_id = hash(box_score.away_team + box_score.home_team + str(box_score.date) + str(box_score.time))
 
         # Convert date and time to datetime object if it exists
-        new_date = dateparser.parse(box_score.date)
+        
         if isinstance(box_score.time, str):
-            new_time = dateparser.parse(box_score.time)
+            new_datetime = dateparser.parse(box_score.date + ' ' + box_score.time)
         else:
-            new_time = box_score.time
+            new_datetime = dateparser.parse(box_score.date + ' 11:59 pm')
         
         # Populate row of game level dataframe
         linescore = box_score.linescore
         game_level = game_level.append({'GameID' : game_id,
                             'AwayTeam' : box_score.away_team,
                             'HomeTeam' : box_score.home_team,
-                            'Date' : new_date,
-                            'Time' : new_time,
+                            'DateTime' : new_datetime,
                             'Attendance' : box_score.attendance,
                             'Venue' : box_score.venue,
                             'Duration' : box_score.duration,
@@ -397,9 +407,9 @@ def parse_box_scores(scores):
                                     'Inn7' : (linescore.loc[1, '7'] if '7' in linescore.columns else np.nan),
                                     'Inn8' : (linescore.loc[1, '8'] if '8' in linescore.columns else np.nan),
                                     'Inn9' : (linescore.loc[1, '9'] if '9' in linescore.columns else np.nan),
-                                    'Runs' : linescore.loc[0, 'R'],
-                                    'Hits' : linescore.loc[0, 'H'],
-                                    'Errors' : linescore.loc[0, 'E'],
+                                    'Runs' : linescore.loc[1, 'R'],
+                                    'Hits' : linescore.loc[1, 'H'],
+                                    'Errors' : linescore.loc[1, 'E'],
                                     'AB' : box_score.home_batting.iloc[-1]['AB'], 
                                     'R' : box_score.home_batting.iloc[-1]['R'], 
                                     'RBI' : box_score.home_batting.iloc[-1]['RBI'], 
