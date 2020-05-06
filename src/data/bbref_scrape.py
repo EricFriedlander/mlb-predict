@@ -38,7 +38,7 @@ class BoxScore(object):
         self.away_games = away_wins + away_losses
         self.home_wins = home_wins
         self.home_losses = home_losses
-        self.home_games = home_wins+home_losses
+        self.home_games = home_wins +  home_losses
 
        
     def set_linescore(self, df):
@@ -111,7 +111,7 @@ class BoxScoreScraper(object):
         home_team = teams[1].text
         scorebox_divs = scorebox.find_all('div')
         away_record = scorebox_divs[5].text.split('-')
-        home_record = scorebox_divs[5].text.split('-')
+        home_record = scorebox_divs[12].text.split('-')
 
         # Get meta information
         scorebox_meta = scorebox.find('div', {'class' : 'scorebox_meta'}).find_all('div')
@@ -299,7 +299,8 @@ def parse_box_scores(scores):
     game_level = pd.DataFrame(columns=['GameID', 'AwayTeam', 'HomeTeam', 'DateTime' , 'Attendance', 'Venue', 'Duration', 'Details',
                                         'AwayScore', 'HomeScore'])
 
-    team_level = pd.DataFrame(columns=['GameID', 'Team', 'HomeAway', 'Inn1', 'Inn2', 'Inn3', 'Inn4', 'Inn5', 'Inn6', 'Inn7', 'Inn8', 'Inn9', 
+    team_level = pd.DataFrame(columns=['GameID', 'Team', 'GameNum', 'Wins', 'Losses', 'HomeAway', 
+                                        'Inn1', 'Inn2', 'Inn3', 'Inn4', 'Inn5', 'Inn6', 'Inn7', 'Inn8', 'Inn9', 
                                         'Runs', 'Hits', 'Errors', 'AB', 'R', 'H', 'RBI', 'BB', 'SO', 'PA', 'BA', 'OBP', 'SLG', 'OPS', 'Pit', 'Str', 'WPA', 'aLI', 'WPA+', 'WPA-', 'RE24', 'PO', 'A',
                                         'Starter', 'IP', 'H_P', 'R_P', 'ER', 'BB_P', 'SO_P', 'HR_P', 'ERA', 'BF', 'Pit_P', 'Str_P', 'Ctct', 'StS', 'StL', 'GB', 'FB', 'LD', 'Unk', 'GSc', 'IR', 'IS', 'WPA_P', 'aLI_P', 'RE24_P'])
 
@@ -309,7 +310,8 @@ def parse_box_scores(scores):
                                             'aLI', 'RE24'])
 
     # Iterate through all box scores
-    for i, box_score in enumerate(scores):    
+    for i, box_score in enumerate(scores): 
+        print(box_score.date)   
 
         # Generate unique game id
         game_id = hash(box_score.away_team + box_score.home_team + str(box_score.date) + str(box_score.time))
@@ -317,7 +319,7 @@ def parse_box_scores(scores):
         # Convert date and time to datetime object if it exists
         
         if isinstance(box_score.time, str):
-            new_datetime = dateparser.parse(box_score.date + ' ' + box_score.time)
+            new_datetime = dateparser.parse(box_score.date + ' ' + box_score.time.replace('Local', ''))
         else:
             new_datetime = dateparser.parse(box_score.date + ' 11:59 pm')
         
@@ -337,6 +339,9 @@ def parse_box_scores(scores):
         # Populate team level dataframes
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.away_team,
+                                    'GameNum': int(box_score.away_wins) + int(box_score.away_losses), 
+                                    'Wins' : box_score.away_wins, 
+                                    'Losses' : box_score.away_losses,
                                     'HomeAway' : 'Away',
                                     'Inn1' : (linescore.loc[0, '1'] if '1' in linescore.columns else np.nan),
                                     'Inn2' : (linescore.loc[0, '2'] if '2' in linescore.columns else np.nan),
@@ -397,6 +402,9 @@ def parse_box_scores(scores):
         
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.home_team,
+                                    'GameNum': int(box_score.home_wins) + int(box_score.home_losses), 
+                                    'Wins' : box_score.home_wins, 
+                                    'Losses' : box_score.home_losses,
                                     'HomeAway' : 'Home',
                                     'Inn1' : (linescore.loc[1, '1'] if '1' in linescore.columns else np.nan),
                                     'Inn2' : (linescore.loc[1, '2'] if '2' in linescore.columns else np.nan),
