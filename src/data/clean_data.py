@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas as pd
 import numpy as np
 import datetime
 
@@ -78,3 +77,64 @@ def clean_team_season_data(team_level, game_level):
     team_data =  team_data = team_data.merge(team_data[defensive_stats].copy(), how='left', left_on=['GameID', 'Opponent'], 
                                          right_on=['GameID', 'Team'], suffixes=('', '_Def'))
     return team_data
+
+def generate_odds_lookup(game_level, odds):
+      '''Generates game level table but with the odds appended
+
+      Args:
+      game_level_fn (DataFrame): game level data
+      odds_fn (DataFrame): odds data
+
+      Returns:
+      DataFrame: look up table
+      '''
+
+      # Rename odds columns
+      odds.rename(columns={'Team' : 'Team_abrv', 'Final' : 'Runs', 'Unnamed: 18' : 'Run_Odds', 'Unnamed: 20' : 'Open_OU_Odds', 'Unnamed: 22' : 'Close_OU_Odds'}, inplace=True)
+
+      # Give game level data name abbreviations to match odds data
+      team_abbrv = {'Atlanta Braves' : 'ATL', 
+              'Arizona Diamondbacks' : 'ARI', 
+              'Baltimore Orioles' : 'BAL', 
+              'Boston Red Sox' : 'BOS', 
+              'Chicago Cubs' : 'CUB', 
+              'Chicago White Sox' : 'CWS', 
+              'Cincinnati Reds' : 'CIN', 
+              'Cleveland Indians' : 'CLE', 
+              'Colorado Rockies' : 'COL', 
+              'Detroit Tigers' : 'DET',
+              'Kansas City Royals': 'KAN', 
+              'Houston Astros' : 'HOU', 
+              'Los Angeles Angels' : 'LAA', 
+              'Los Angeles Dodgers' : 'LAD', 
+              'Miami Marlins' : 'MIA', 
+              'Florida Marlins' : 'FLA', 
+              'Milwaukee Brewers' : 'MIL', 
+              'Minnesota Twins' : 'MIN', 
+              'New York Mets' : 'NYM', 
+              'New York Yankees' : 'NYY', 
+              'Oakland Athletics' : 'OAK',
+              'Philadelphia Phillies' : 'PHI', 
+              'Pittsburgh Pirates' : 'PIT', 
+              'San Diego Padres' : 'SDG', 
+              'Seattle Mariners' : 'SEA', 
+              'San Francisco Giants' : 'SFO', 
+              'St. Louis Cardinals' : 'STL', 
+              'Tampa Bay Rays' : 'TAM', 
+              'Texas Rangers' : 'TEX', 
+              'Toronto Blue Jays' : 'TOR', 
+              'Washington Nationals' : 'WAS'}
+      game_level['Home_abrv'] = game_level['HomeTeam'].apply(lambda x: team_abbrv[x])
+      game_level['Away_abrv'] = game_level['AwayTeam'].apply(lambda x: team_abbrv[x])
+      game_level['Date'] = game_level['DateTime'].map(lambda x: x.month*100 + x.day)
+
+      # Merge odds onto game level data. Two odds entries per game so only need to join on home team
+      odds_lookup = game_level.merge(odds, how='left', left_on=['Date', 'Home_abrv', 'HomeScore'], right_on=['Date', 'Team_abrv', 'Runs'], suffixes=('', '_home'))
+
+      # There are a handful of double heads that can't be untables so we'll drop them
+      id_counts = odds_lookup['GameID'].value_counts()
+      repeats = id_counts[id_counts > 1].index
+      odds_lookup = odds_lookup[odds_lookup['GameID'].isin(repeats)]
+      
+      return odds_lookup
+
