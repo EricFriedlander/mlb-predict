@@ -339,8 +339,9 @@ def parse_box_scores(scores):
         # Populate team level dataframes
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.away_team,
-                                    'Opponent' : box_score.home_team,
                                     'GameNum': int(box_score.away_wins) + int(box_score.away_losses), 
+                                    'Opponent' : box_score.home_team,
+                                    'GameNumOpponent': int(box_score.home_wins) + int(box_score.home_losses), 
                                     'Wins' : box_score.away_wins, 
                                     'Losses' : box_score.away_losses,
                                     'HomeAway' : 'Away',
@@ -403,8 +404,9 @@ def parse_box_scores(scores):
         
         team_level = team_level.append({'GameID' : game_id,
                                     'Team' : box_score.home_team,
-                                    'Opponent' : box_score.away_team,
                                     'GameNum': int(box_score.home_wins) + int(box_score.home_losses), 
+                                    'Opponent' : box_score.away_team,
+                                    'GameNumOpponent': int(box_score.away_wins) + int(box_score.away_losses), 
                                     'Wins' : box_score.home_wins, 
                                     'Losses' : box_score.home_losses,
                                     'HomeAway' : 'Home',
