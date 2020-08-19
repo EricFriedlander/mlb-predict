@@ -134,7 +134,6 @@ def generate_odds_lookup(game_level, odds):
       # There are a handful of double heads that can't be untables so we'll drop them
       id_counts = odds_lookup['GameID'].value_counts()
       repeats = id_counts[id_counts > 1].index
-      odds_lookup = odds_lookup[odds_lookup['GameID'].isin(repeats)]
-      
+      odds_lookup = odds_lookup[-odds_lookup['GameID'].isin(repeats)]
       return odds_lookup
 
