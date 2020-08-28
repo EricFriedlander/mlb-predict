@@ -128,12 +128,14 @@ def generate_odds_lookup(game_level, odds):
       game_level['Away_abrv'] = game_level['AwayTeam'].apply(lambda x: team_abbrv[x])
       game_level['Date'] = game_level['DateTime'].map(lambda x: x.month*100 + x.day)
 
-      # Merge odds onto game level data. Two odds entries per game so only need to join on home team
+      # Merge odds onto game level data
       odds_lookup = game_level.merge(odds, how='left', left_on=['Date', 'Home_abrv', 'HomeScore'], right_on=['Date', 'Team_abrv', 'Runs'], suffixes=('', '_home'))
+      odds_lookup = odds_lookup.merge(odds, how='left', left_on=['Date', 'Away_abrv', 'AwayScore'], right_on=['Date', 'Team_abrv', 'Runs'], suffixes=('', '_away'))
+
 
       # There are a handful of double heads that can't be untables so we'll drop them
       id_counts = odds_lookup['GameID'].value_counts()
       repeats = id_counts[id_counts > 1].index
       odds_lookup = odds_lookup[-odds_lookup['GameID'].isin(repeats)]
-      return odds_lookup
+      return odds_lookup.copy()
 
